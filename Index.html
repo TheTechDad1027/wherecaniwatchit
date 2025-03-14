@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Where can I find it</title>
+  <style>
+    /* Header styling */
+    header {
+      background-color: #222;
+      text-align: center;
+      padding: 10px 0;
+    }
+    header img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Dark-themed responsive UI */
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      flex: 1;
+    }
+    h1 {text-align: center;}
+    #searchInput {
+      width: 600px;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 0px;
+    }
+    .result {
+      border-bottom: 1px solid #333;
+      padding: 0px 0;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .result img {
+      max-width: 200px;
+      height: auto; /* Maintain aspect ratio */
+      border-radius: 4px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .result-content {
+      flex: 1;
+    }
+    .clickable {
+      color: #1e90ff;
+      cursor: pointer;
+    }
+    .streaming, .actors, .known-for, .all-credits {
+      margin-top: 10px;
+    }
+    iframe {
+      margin-top: 10px;
+      border: none;
+      border-radius: 4px;
+    }
+    #dropdownContainer {
+      margin: 20px 0;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      background-color: #1e1e1e;
+      color: #f1f1f1;
+    }
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #333;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    footer img {
+      max-width: 100px;
+      height: auto;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+	<header> 
+		<center>
+			<table style="width:70%;">
+				<tr>
+					<td style="width:20%; text-align: Center;"><img src=".\0.png" style="width: 80%; height: 80%"></td>
+					<td style="text-align: Center;"><input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..."></td>
+				</tr>
+			</table>	
+		</center> 
+	</header> 
+
+	<div class="container">  
+		<!-- Main result display -->
+		<div id="mainResult"></div> 
+		<!-- Dropdown for additional results -->
+		<div id="dropdownContainer"></div>
+	</div>
+
+	<footer>
+		<center>
+			<table style="width:70%;">
+				<tr>
+					<td style="width:15%; text-align: Center;">
+						<p style="font-size:.75vw;">The TechDad1027
+						<img alt="thetechdad1027@gmail.com" src=".\Logo.png" style="width: 60%; height: 60%;">
+						thetechdad1027@gmail.com							
+					</td>
+					<td style="width:70%; text-align: Center;">							
+					</td>
+					<td style="width:15%; text-align: Center;">
+						<img src=".\Coffee.png" style="width: 50%; height: 50%">
+						<br><a href="https://buymeacoffee.com/thetechdad1027" style="color:white">Buy me a coffee!</a>
+						</p>		
+					</td>
+				</tr>
+			</table>
+		</center> 
+	</footer>
+  
+  <script>
+    // TMDb API key and image base URL
+    const apiKey = "020fd53d900b9f0ece40d4ca501d5065";
+    const baseImageUrl = "https://image.tmdb.org/t/p/w500";
+    
+    const searchInput = document.getElementById('searchInput');
+    const mainResult = document.getElementById('mainResult');
+    const dropdownContainer = document.getElementById('dropdownContainer');
+    
+    let searchResults = [];
+    
+    searchInput.addEventListener('blur', () => {
+      const query = searchInput.value.trim();
+      if(query !== ""){
+        performSearch(query);
+      }
+    });
+    
+    searchInput.addEventListener('focus', () => {
+      searchInput.value = "";
+    });
+    
+    function performSearch(query) {
+      mainResult.innerHTML = "";
+      dropdownContainer.innerHTML = "";
+      searchResults = [];
+      
+      mainResult.innerHTML = "<p>Loading...</p>";
+      const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}`;
+      
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if(data.results && data.results.length > 0) {
+            searchResults = data.results;
+            renderMainResult(searchResults[0]);
+            if(searchResults.length > 1) {
+              buildDropdown(searchResults.slice(1));
+            }
+          } else {
+            mainResult.innerHTML = "<p>No results found.</p>";
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          mainResult.innerHTML = "<p>Error fetching data. Please try again later.</p>";
+        });
+    }
+    
+    function fetchMediaDetails(item) {
+      const type = item.media_type;
+      const endpoint = type === "movie" ? "movie" : "tv";
+      const url = `https://api.themoviedb.org/3/${endpoint}/${item.id}?api_key=${apiKey}&append_to_response=watch/providers,videos,credits,next_episode_to_air`;
+      return fetch(url).then(response => response.json())
+        .then(details => {
+          if(!details.media_type && details.hasOwnProperty("next_episode_to_air")){
+            details.media_type = "tv";
+          }
+          return details;
+        });
+    }
+    
+    function renderMainResult(item) {
+      mainResult.innerHTML = "";
+      if(item.media_type === "movie" || item.media_type === "tv") {
+        fetchMediaDetails(item)
+          .then(details => {
+            renderMediaResult(details, mainResult);
+          })
+          .catch(error => {
+            console.error("Error fetching details:", error);
+            mainResult.innerHTML = "<p>Error loading detailed information.</p>";
+          });
+      } else if(item.media_type === "person") {
+        renderPersonResult(item, mainResult);
+      }
+    }
+    
+    function buildDropdown(results) {
+      const limitedResults = results.slice(0,10);
+      const label = document.createElement('label');
+      label.textContent = "Other Results:";
+      label.style.display = "block";
+      label.style.marginBottom = "5px";
+      
+      const select = document.createElement('select');
+      const defaultOption = document.createElement('option');
+      defaultOption.textContent = "Select a result...";
+      defaultOption.value = "";
+      defaultOption.disabled = true;
+      defaultOption.selected = true;
+      select.appendChild(defaultOption);
+      
+      limitedResults.forEach((item, index) => {
+        const option = document.createElement('option');
+        const title = item.title || item.name || "Untitled";
+        let releaseYear = "";
+        if(item.release_date) {
+          releaseYear = new Date(item.release_date).getFullYear();
+        } else if(item.first_air_date) {
+          releaseYear = new Date(item.first_air_date).getFullYear();
+        }
+        option.textContent = releaseYear ? `${title} (${releaseYear})` : title;
+        option.value = index + 1;
+        select.appendChild(option);
+      });
+      
+      select.addEventListener('change', (e) => {
+        const selectedIndex = parseInt(e.target.value, 10);
+        if(!isNaN(selectedIndex)) {
+          renderMainResult(searchResults[selectedIndex]);
+        }
+      });
+      
+      dropdownContainer.appendChild(label);
+      dropdownContainer.appendChild(select);
+    }
+    
+    function renderMediaResult(item, container) {
+      const div = document.createElement('div');
+      div.className = "result";
+      
+      const img = document.createElement('img');
+      if(item.poster_path) {
+        img.src = baseImageUrl + item.poster_path;
+      } else {
+        img.alt = "No Image Available";
+      }
+      div.appendChild(img);
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "result-content";
+      
+      const title = document.createElement('h2');
+      title.textContent = item.title || item.name;
+      contentDiv.appendChild(title);
+      
+      const overview = document.createElement('p');
+      overview.textContent = item.overview || "No description available.";
+      contentDiv.appendChild(overview);
+      
+      // For TV shows: display next episode air date with enhanced messaging.
+      if(item.media_type === "tv") {
+        const nextEpisode = document.createElement('p');
+        if(item.next_episode_to_air && item.next_episode_to_air.air_date) {
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> ${item.next_episode_to_air.air_date}`;
+        } else {
+          // In production, you might further check if the show has ended.
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> This TV show may have ended or no upcoming episode is scheduled.`;
+        }
+        contentDiv.appendChild(nextEpisode);
+      }
+      
+      if(item.credits && item.credits.cast && item.credits.cast.length > 0) {
+        const actorsDiv = document.createElement('div');
+        actorsDiv.className = "actors";
+        actorsDiv.innerHTML = "<strong>Main Actors:</strong> ";
+        item.credits.cast.slice(0,5).forEach(actor => {
+          const actorSpan = document.createElement('span');
+          actorSpan.textContent = actor.name;
+          actorSpan.className = "clickable";
+          actorSpan.style.marginRight = "10px";
+          actorSpan.addEventListener('click', () => {
+            searchInput.value = actor.name;
+            performSearch(actor.name);
+          });
+          actorsDiv.appendChild(actorSpan);
+        });
+        contentDiv.appendChild(actorsDiv);
+      }
+      
+      if(item["watch/providers"] && item["watch/providers"].results && item["watch/providers"].results.US) {
+        const providers = item["watch/providers"].results.US.flatrate || item["watch/providers"].results.US.buy || [];
+        if(providers.length > 0) {
+          const streamDiv = document.createElement('div');
+          streamDiv.className = "streaming";
+          streamDiv.innerHTML = "<strong>Streaming on:</strong> ";
+          providers.forEach(provider => {
+            const provSpan = document.createElement('span');
+            provSpan.textContent = provider.provider_name;
+            provSpan.style.marginRight = "10px";
+            streamDiv.appendChild(provSpan);
+          });
+          contentDiv.appendChild(streamDiv);
+        }
+      }
+      
+      if(item.videos && item.videos.results && item.videos.results.length > 0) {
+        const trailer = item.videos.results.find(video => video.type === "Trailer" && video.site === "YouTube");
+        if(trailer) {
+          const iframe = document.createElement('iframe');
+          iframe.width = "560";
+          iframe.height = "315";
+          iframe.src = `https://www.youtube.com/embed/${trailer.key}`;
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          contentDiv.appendChild(iframe);
+        }
+      }
+      
+      div.appendChild(contentDiv);
+      container.appendChild(div);
+    }
+    
+    function renderPersonResult(item, container) {
+      const div = document.createElement('div');
+      div.className = "result";
+      
+      const img = document.createElement('img');
+      if(item.profile_path) {
+        img.src = baseImageUrl + item.profile_path;
+      } else {
+        img.alt = "No Image Available";
+      }
+      div.appendChild(img);
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "result-content";
+      
+      const name = document.createElement('h2');
+      name.textContent = item.name;
+      contentDiv.appendChild(name);
+      
+      if(item.known_for && item.known_for.length > 0) {
+        const knownForDiv = document.createElement('div');
+        knownForDiv.className = "known-for";
+        knownForDiv.innerHTML = "<strong>Known For:</strong><br>";
+        item.known_for.forEach(project => {
+          const projectDiv = document.createElement('div');
+          projectDiv.style.marginBottom = "10px";
+          
+          const projectTitle = project.title || project.name || "Untitled";
+          let releaseYear = "";
+          if(project.release_date) {
+            releaseYear = new Date(project.release_date).getFullYear();
+          } else if(project.first_air_date) {
+            releaseYear = new Date(project.first_air_date).getFullYear();
+          }
+          const titleSpan = document.createElement('span');
+          titleSpan.textContent = releaseYear ? `${projectTitle} (${releaseYear})` : projectTitle;
+          titleSpan.className = "clickable";
+          titleSpan.addEventListener('click', () => {
+            searchInput.value = projectTitle;
+            performSearch(projectTitle);
+          });
+          projectDiv.appendChild(titleSpan);
+          knownForDiv.appendChild(projectDiv);
+        });
+        contentDiv.appendChild(knownForDiv);
+      }
+      
+      div.appendChild(contentDiv);
+      container.appendChild(div);
+    }
+  </script>
+</body>
+</html>
