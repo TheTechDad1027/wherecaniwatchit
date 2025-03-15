@@ -92,7 +92,7 @@
       font-size: 1em;
     }
     
-    /* Other Results styling as a grid */
+    /* Other Results styling as a grid with smaller cards */
     #otherResults {
       margin: 20px 0;
     }
@@ -102,7 +102,7 @@
     }
     .card-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 10px;
     }
     .card {
@@ -172,6 +172,38 @@
       font-size: 1.5em;
       cursor: pointer;
     }
+    /* Unmute toggle button styling */
+    #unmute-button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #1e90ff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #unmute-button:focus {
+      outline: 3px solid #fff;
+    }
+    /* Stop Trailer button styling */
+    #stop-button {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #ff0000;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #stop-button:focus {
+      outline: 3px solid #fff;
+    }
   </style>
 </head>
 <body>
@@ -186,7 +218,7 @@
             <input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..." tabindex="0">
           </td>
         </tr>
-      </table>	
+      </table>  
     </center> 
   </header> 
 
@@ -222,12 +254,24 @@
   <div id="overlay">
     <div id="overlay-content">
       <button id="close-overlay">&times;</button>
-      <!-- The YouTube iframe will be injected here -->
+      <!-- The YouTube player will be inserted in the "player" div below -->
+      <div id="player"></div>
+      <!-- Unmute toggle button -->
+      <button id="unmute-button" tabindex="0">Unmute</button>
+      <!-- Stop Trailer button -->
+      <button id="stop-button" tabindex="0">Stop Trailer</button>
     </div>
   </div>
   
   <script>
-    // TMDb API key and image base URL
+    // Load YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player; // Global YT.Player instance
+
     const apiKey = "020fd53d900b9f0ece40d4ca501d5065";
     const baseImageUrl = "https://image.tmdb.org/t/p/w500";
     
@@ -236,6 +280,8 @@
     const otherResultsContainer = document.getElementById('otherResults');
     const overlay = document.getElementById('overlay');
     const closeOverlayBtn = document.getElementById('close-overlay');
+    const unmuteButton = document.getElementById('unmute-button');
+    const stopButton = document.getElementById('stop-button');
     
     let searchResults = [];
     
@@ -311,14 +357,15 @@
       const container = otherResultsContainer;
       container.innerHTML = "";
       
+      // Rename header as requested.
       const header = document.createElement('h3');
-      header.textContent = "Other Results";
+      header.textContent = "You may also be looking for:";
       container.appendChild(header);
       
       const gridContainer = document.createElement('div');
       gridContainer.className = "card-container";
       gridContainer.style.display = "grid";
-      gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+      gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(150px, 1fr))";
       gridContainer.style.gap = "10px";
       
       results.slice(0, 10).forEach((item) => {
@@ -381,6 +428,18 @@
       overview.textContent = item.overview || "No description available.";
       contentDiv.appendChild(overview);
       
+      // If TV show: Next Episode Air Date with extra space above
+      if(item.media_type === "tv") {
+        const nextEpisode = document.createElement('p');
+        nextEpisode.style.marginTop = "10px";
+        if(item.next_episode_to_air && item.next_episode_to_air.air_date) {
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> ${item.next_episode_to_air.air_date}`;
+        } else {
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> Not available`;
+        }
+        contentDiv.appendChild(nextEpisode);
+      }
+      
       // Available Trailers Section
       if(item.videos && item.videos.results && item.videos.results.length > 0) {
         const trailer = item.videos.results.find(video => video.type === "Trailer" && video.site === "YouTube");
@@ -409,7 +468,7 @@
           const actorSpan = document.createElement('span');
           actorSpan.textContent = actor.name;
           actorSpan.className = "clickable";
-          actorSpan.style.marginRight = "5px"; // Reduced margin from 10px to 5px
+          actorSpan.style.marginRight = "5px";
           actorSpan.setAttribute("tabindex", "0");
           actorSpan.addEventListener('click', () => {
             searchInput.value = actor.name;
@@ -426,7 +485,7 @@
         contentDiv.appendChild(actorsDiv);
       }
       
-      // Streaming on Section
+      // Streaming on Section with separators
       if(item["watch/providers"] && item["watch/providers"].results && item["watch/providers"].results.US) {
         const providers = item["watch/providers"].results.US.flatrate || item["watch/providers"].results.US.buy || [];
         if(providers.length > 0) {
@@ -511,18 +570,56 @@
       container.appendChild(div);
     }
     
-    // Overlay functions for trailer playback.
+    // Overlay functions for trailer playback using YouTube IFrame API with toggle mute and stop.
     function openOverlay(videoKey) {
-      const iframe = document.createElement('iframe');
-      // Autoplay and mute to ensure the video starts automatically
-      iframe.src = `https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1`;
-      iframe.width = "100%";
-      iframe.height = "450px";
-
       const overlayContent = document.getElementById('overlay-content');
       overlayContent.innerHTML = "";
-      overlayContent.appendChild(iframe);
-
+      
+      // Create a container for the YouTube player
+      const playerDiv = document.createElement('div');
+      playerDiv.id = "player";
+      overlayContent.appendChild(playerDiv);
+      
+      // Create the unmute toggle button
+      const unmuteButton = document.createElement('button');
+      unmuteButton.id = "unmute-button";
+      unmuteButton.textContent = "Unmute";
+      overlayContent.appendChild(unmuteButton);
+      
+      // Create the stop trailer button
+      const stopButton = document.createElement('button');
+      stopButton.id = "stop-button";
+      stopButton.textContent = "Stop Trailer";
+      overlayContent.appendChild(stopButton);
+      
+      // Create the YouTube player using the IFrame API
+      player = new YT.Player('player', {
+        height: '450',
+        width: '100%',
+        videoId: videoKey,
+        playerVars: {
+          autoplay: 1,
+          mute: 1
+        },
+        events: {
+          'onReady': function(event) {
+            unmuteButton.addEventListener('click', function() {
+              if (player.isMuted()) {
+                player.unMute();
+                unmuteButton.textContent = "Mute";
+              } else {
+                player.mute();
+                unmuteButton.textContent = "Unmute";
+              }
+            });
+            stopButton.addEventListener('click', function() {
+              player.stopVideo();
+              closeOverlay();
+            });
+          }
+        }
+      });
+      
       document.getElementById('overlay').style.display = "flex";
     }
 
@@ -537,6 +634,11 @@
         closeOverlay();
       }
     });
+    
+    // Set the search field as the first tab stop on page load.
+    window.onload = function() {
+      document.getElementById('searchInput').focus();
+    };
   </script>
 
   <!-- Overlay for trailer playback -->
