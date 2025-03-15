@@ -14,8 +14,8 @@
       max-width: 100%;
       height: auto;
     }
-
-    /* Dark-themed responsive UI */
+    
+    /* Dark-themed responsive UI optimized for Android TV */
     body {
       background-color: #121212;
       color: #f1f1f1;
@@ -25,6 +25,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      font-size: 16px; /* Base font size */
     }
     .container {
       max-width: 960px;
@@ -32,18 +33,22 @@
       padding: 20px;
       flex: 1;
     }
-    h1 {text-align: center;}
+    h1 { text-align: center; }
     #searchInput {
       width: 600px;
       padding: 12px;
-      font-size: 16px;
+      font-size: 1.5em;
       border: none;
-      border-radius: 4px;
-      margin-bottom: 0px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    #searchInput:focus {
+      outline: 3px solid #1e90ff;
     }
     .result {
       border-bottom: 1px solid #333;
-      padding: 0px 0;
+      padding: 20px;
       display: flex;
       flex-wrap: wrap;
     }
@@ -58,35 +63,70 @@
     .result-content {
       flex: 1;
     }
+    .result-content h2 {
+      font-size: 1.5em;
+      margin: 0 0 10px 0;
+    }
+    .result-content p {
+      margin: 0.5em 0;
+      font-size: 1em;
+    }
+    .result-content strong {
+      font-size: 1em;
+    }
+    
+    /* Clickable elements for remote control */
     .clickable {
       color: #1e90ff;
       cursor: pointer;
+      padding: 8px;
+      display: inline-block;
     }
+    .clickable:focus {
+      outline: 3px solid #1e90ff;
+    }
+    
+    /* Sections (Available Trailers, Main Actors, Streaming on) */
     .streaming, .actors, .known-for, .all-credits {
       margin-top: 10px;
+      font-size: 1em;
     }
-    iframe {
-      margin-top: 10px;
-      border: none;
-      border-radius: 4px;
-    }
-    #dropdownContainer {
+    
+    /* Other Results styling as a grid */
+    #otherResults {
       margin: 20px 0;
     }
-    select {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 4px;
-      background-color: #1e1e1e;
-      color: #f1f1f1;
+    #otherResults h3 {
+      margin-bottom: 10px;
+      font-size: 1.2em;
     }
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .card:focus {
+      outline: 3px solid #1e90ff;
+    }
+    .card p {
+      margin: 5px 0;
+      font-size: 1em;
+    }
+    
     /* Footer styling */
     footer {
       text-align: center;
       padding: 10px;
       border-top: 1px solid #333;
-      font-size: 14px;
+      font-size: 1em;
       margin-top: 20px;
     }
     footer img {
@@ -95,47 +135,96 @@
       border-radius: 4px;
       margin-top: 10px;
     }
+    
+    /* Overlay styling for trailer playback */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #overlay-content {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+    }
+    #overlay-content iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+    }
+    #close-overlay {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-	<header> 
-		<center>
-			<table style="width:70%;">
-				<tr>
-					<td style="width:20%; text-align: Center;"><img src=".\0.png" style="width: 80%; height: 80%"></td>
-					<td style="text-align: Center;"><input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..."></td>
-				</tr>
-			</table>	
-		</center> 
-	</header> 
+  <header> 
+    <center>
+      <table style="width:70%;">
+        <tr>
+          <td style="width:20%; text-align: center;">
+            <img src=".\0.png" style="width: 80%; height: 80%;">
+          </td>
+          <td style="text-align: center;">
+            <input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..." tabindex="0">
+          </td>
+        </tr>
+      </table>	
+    </center> 
+  </header> 
 
-	<div class="container">  
-		<!-- Main result display -->
-		<div id="mainResult"></div> 
-		<!-- Dropdown for additional results -->
-		<div id="dropdownContainer"></div>
-	</div>
+  <div class="container">
+    <!-- Main result display -->
+    <div id="mainResult"></div>
+    <!-- Other Results displayed as a grid -->
+    <div id="otherResults"></div>
+  </div>
 
-	<footer>
-		<center>
-			<table style="width:70%;">
-				<tr>
-					<td style="width:15%; text-align: Center;">
-						<p style="font-size:.75vw;">The TechDad1027
-						<img alt="thetechdad1027@gmail.com" src=".\Logo.png" style="width: 60%; height: 60%;">
-						thetechdad1027@gmail.com							
-					</td>
-					<td style="width:70%; text-align: Center;">							
-					</td>
-					<td style="width:15%; text-align: Center;">
-						<img src=".\Coffee.png" style="width: 50%; height: 50%">
-						<br><a href="https://buymeacoffee.com/thetechdad1027" style="color:white">Buy me a coffee!</a>
-						</p>		
-					</td>
-				</tr>
-			</table>
-		</center> 
-	</footer>
+  <footer>
+    <center>
+      <table style="width:70%;">
+        <tr>
+          <td style="width:15%; text-align: center;">
+            <p style="font-size: 0.75vw;">
+              The TechDad1027
+              <img alt="thetechdad1027@gmail.com" src=".\Logo.png" style="width: 60%; height: 60%;">
+              thetechdad1027@gmail.com
+            </p>
+          </td>
+          <td style="width:70%; text-align: center;"></td>
+          <td style="width:15%; text-align: center;">
+            <img src=".\Coffee.png" style="width: 50%; height: 50%;">
+            <br><a href="https://buymeacoffee.com/thetechdad1027" style="color:white; font-size:1em;">Buy me a coffee!</a>
+          </td>
+        </tr>
+      </table>
+    </center> 
+  </footer>
+
+  <!-- Overlay for trailer playback -->
+  <div id="overlay">
+    <div id="overlay-content">
+      <button id="close-overlay">&times;</button>
+      <!-- The YouTube iframe will be injected here -->
+    </div>
+  </div>
   
   <script>
     // TMDb API key and image base URL
@@ -144,7 +233,9 @@
     
     const searchInput = document.getElementById('searchInput');
     const mainResult = document.getElementById('mainResult');
-    const dropdownContainer = document.getElementById('dropdownContainer');
+    const otherResultsContainer = document.getElementById('otherResults');
+    const overlay = document.getElementById('overlay');
+    const closeOverlayBtn = document.getElementById('close-overlay');
     
     let searchResults = [];
     
@@ -161,7 +252,7 @@
     
     function performSearch(query) {
       mainResult.innerHTML = "";
-      dropdownContainer.innerHTML = "";
+      otherResultsContainer.innerHTML = "";
       searchResults = [];
       
       mainResult.innerHTML = "<p>Loading...</p>";
@@ -174,7 +265,7 @@
             searchResults = data.results;
             renderMainResult(searchResults[0]);
             if(searchResults.length > 1) {
-              buildDropdown(searchResults.slice(1));
+              buildOtherResults(searchResults.slice(1));
             }
           } else {
             mainResult.innerHTML = "<p>No results found.</p>";
@@ -215,44 +306,55 @@
       }
     }
     
-    function buildDropdown(results) {
-      const limitedResults = results.slice(0,10);
-      const label = document.createElement('label');
-      label.textContent = "Other Results:";
-      label.style.display = "block";
-      label.style.marginBottom = "5px";
+    // Build Other Results as a grid of cards (multiple rows)
+    function buildOtherResults(results) {
+      const container = otherResultsContainer;
+      container.innerHTML = "";
       
-      const select = document.createElement('select');
-      const defaultOption = document.createElement('option');
-      defaultOption.textContent = "Select a result...";
-      defaultOption.value = "";
-      defaultOption.disabled = true;
-      defaultOption.selected = true;
-      select.appendChild(defaultOption);
+      const header = document.createElement('h3');
+      header.textContent = "Other Results";
+      container.appendChild(header);
       
-      limitedResults.forEach((item, index) => {
-        const option = document.createElement('option');
-        const title = item.title || item.name || "Untitled";
+      const gridContainer = document.createElement('div');
+      gridContainer.className = "card-container";
+      gridContainer.style.display = "grid";
+      gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+      gridContainer.style.gap = "10px";
+      
+      results.slice(0, 10).forEach((item) => {
+        const card = document.createElement('div');
+        card.className = "card";
+        card.setAttribute("tabindex", "0");
+        
+        const cardTitle = document.createElement('p');
+        cardTitle.textContent = item.title || item.name || "Untitled";
+        card.appendChild(cardTitle);
+        
         let releaseYear = "";
         if(item.release_date) {
           releaseYear = new Date(item.release_date).getFullYear();
         } else if(item.first_air_date) {
           releaseYear = new Date(item.first_air_date).getFullYear();
         }
-        option.textContent = releaseYear ? `${title} (${releaseYear})` : title;
-        option.value = index + 1;
-        select.appendChild(option);
-      });
-      
-      select.addEventListener('change', (e) => {
-        const selectedIndex = parseInt(e.target.value, 10);
-        if(!isNaN(selectedIndex)) {
-          renderMainResult(searchResults[selectedIndex]);
+        if(releaseYear) {
+          const yearP = document.createElement('p');
+          yearP.textContent = releaseYear;
+          card.appendChild(yearP);
         }
+        
+        card.addEventListener('click', () => {
+          renderMainResult(item);
+        });
+        card.addEventListener('keydown', (e) => {
+          if(e.key === "Enter"){
+            renderMainResult(item);
+          }
+        });
+        
+        gridContainer.appendChild(card);
       });
       
-      dropdownContainer.appendChild(label);
-      dropdownContainer.appendChild(select);
+      container.appendChild(gridContainer);
     }
     
     function renderMediaResult(item, container) {
@@ -274,22 +376,31 @@
       title.textContent = item.title || item.name;
       contentDiv.appendChild(title);
       
+      // Description Section
       const overview = document.createElement('p');
       overview.textContent = item.overview || "No description available.";
       contentDiv.appendChild(overview);
       
-      // For TV shows: display next episode air date with enhanced messaging.
-      if(item.media_type === "tv") {
-        const nextEpisode = document.createElement('p');
-        if(item.next_episode_to_air && item.next_episode_to_air.air_date) {
-          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> ${item.next_episode_to_air.air_date}`;
-        } else {
-          // In production, you might further check if the show has ended.
-          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> This TV show may have ended or no upcoming episode is scheduled.`;
+      // Available Trailers Section
+      if(item.videos && item.videos.results && item.videos.results.length > 0) {
+        const trailer = item.videos.results.find(video => video.type === "Trailer" && video.site === "YouTube");
+        if(trailer) {
+          const trailerSection = document.createElement('p');
+          trailerSection.innerHTML = "<strong>Available Trailers:</strong> ";
+          const playLink = document.createElement('a');
+          playLink.href = "#";
+          playLink.textContent = "Play";
+          playLink.className = "clickable";
+          playLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openOverlay(trailer.key);
+          });
+          trailerSection.appendChild(playLink);
+          contentDiv.appendChild(trailerSection);
         }
-        contentDiv.appendChild(nextEpisode);
       }
       
+      // Main Actors Section
       if(item.credits && item.credits.cast && item.credits.cast.length > 0) {
         const actorsDiv = document.createElement('div');
         actorsDiv.className = "actors";
@@ -298,42 +409,43 @@
           const actorSpan = document.createElement('span');
           actorSpan.textContent = actor.name;
           actorSpan.className = "clickable";
-          actorSpan.style.marginRight = "10px";
+          actorSpan.style.marginRight = "5px"; // Reduced margin from 10px to 5px
+          actorSpan.setAttribute("tabindex", "0");
           actorSpan.addEventListener('click', () => {
             searchInput.value = actor.name;
             performSearch(actor.name);
+          });
+          actorSpan.addEventListener('keydown', (e) => {
+            if(e.key === "Enter"){
+              searchInput.value = actor.name;
+              performSearch(actor.name);
+            }
           });
           actorsDiv.appendChild(actorSpan);
         });
         contentDiv.appendChild(actorsDiv);
       }
       
+      // Streaming on Section
       if(item["watch/providers"] && item["watch/providers"].results && item["watch/providers"].results.US) {
         const providers = item["watch/providers"].results.US.flatrate || item["watch/providers"].results.US.buy || [];
         if(providers.length > 0) {
           const streamDiv = document.createElement('div');
           streamDiv.className = "streaming";
           streamDiv.innerHTML = "<strong>Streaming on:</strong> ";
-          providers.forEach(provider => {
+          providers.forEach((provider, index) => {
             const provSpan = document.createElement('span');
             provSpan.textContent = provider.provider_name;
-            provSpan.style.marginRight = "10px";
+            provSpan.style.marginRight = "5px";
             streamDiv.appendChild(provSpan);
+            if (index < providers.length - 1) {
+              const sepSpan = document.createElement('span');
+              sepSpan.textContent = " | ";
+              sepSpan.style.marginRight = "5px";
+              streamDiv.appendChild(sepSpan);
+            }
           });
           contentDiv.appendChild(streamDiv);
-        }
-      }
-      
-      if(item.videos && item.videos.results && item.videos.results.length > 0) {
-        const trailer = item.videos.results.find(video => video.type === "Trailer" && video.site === "YouTube");
-        if(trailer) {
-          const iframe = document.createElement('iframe');
-          iframe.width = "560";
-          iframe.height = "315";
-          iframe.src = `https://www.youtube.com/embed/${trailer.key}`;
-          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          iframe.allowFullscreen = true;
-          contentDiv.appendChild(iframe);
         }
       }
       
@@ -378,9 +490,16 @@
           const titleSpan = document.createElement('span');
           titleSpan.textContent = releaseYear ? `${projectTitle} (${releaseYear})` : projectTitle;
           titleSpan.className = "clickable";
+          titleSpan.setAttribute("tabindex", "0");
           titleSpan.addEventListener('click', () => {
             searchInput.value = projectTitle;
             performSearch(projectTitle);
+          });
+          titleSpan.addEventListener('keydown', (e) => {
+            if(e.key === "Enter"){
+              searchInput.value = projectTitle;
+              performSearch(projectTitle);
+            }
           });
           projectDiv.appendChild(titleSpan);
           knownForDiv.appendChild(projectDiv);
@@ -391,6 +510,40 @@
       div.appendChild(contentDiv);
       container.appendChild(div);
     }
+    
+    // Overlay functions for trailer playback.
+    function openOverlay(videoKey) {
+      const iframe = document.createElement('iframe');
+      // Autoplay and mute to ensure the video starts automatically
+      iframe.src = `https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1`;
+      iframe.width = "100%";
+      iframe.height = "450px";
+
+      const overlayContent = document.getElementById('overlay-content');
+      overlayContent.innerHTML = "";
+      overlayContent.appendChild(iframe);
+
+      document.getElementById('overlay').style.display = "flex";
+    }
+
+    function closeOverlay() {
+      document.getElementById('overlay').style.display = "none";
+    }
+
+    document.getElementById('close-overlay').addEventListener('click', closeOverlay);
+
+    document.getElementById('overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeOverlay();
+      }
+    });
   </script>
+
+  <!-- Overlay for trailer playback -->
+  <div id="overlay" style="display: none;">
+    <div id="overlay-content" style="position: relative; width: 80%; max-width: 800px;">
+      <button id="close-overlay" style="position: absolute; top: -20px; right: -20px; background: #fff; color: #000; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5em; cursor: pointer;">&times;</button>
+    </div>
+  </div>
 </body>
 </html>
