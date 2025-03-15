@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Where can I find it</title>
+  <style>
+    /* Header styling */
+    header {
+      background-color: #222;
+      text-align: center;
+      padding: 10px 0;
+    }
+    header img {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    /* Dark-themed responsive UI optimized for Android TV */
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-size: 16px; /* Base font size */
+    }
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+      flex: 1;
+    }
+    h1 { text-align: center; }
+    /* Smaller search field style */
+    #searchInput {
+      width: 500px;
+      padding: 10px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    #searchInput:focus {
+      outline: 3px solid #1e90ff;
+    }
+    /* Style for the search button */
+    #searchButton {
+      padding: 10px 15px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      background-color: #1e90ff;
+      color: #fff;
+      cursor: pointer;
+    }
+    #searchButton:focus {
+      outline: 3px solid #fff;
+    }
+    .result {
+      border-bottom: 1px solid #333;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .result img {
+      max-width: 200px;
+      height: auto; /* Maintain aspect ratio */
+      border-radius: 4px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .result-content {
+      flex: 1;
+    }
+    .result-content h2 {
+      font-size: 1.5em;
+      margin: 0 0 10px 0;
+    }
+    .result-content p {
+      margin: 0.5em 0;
+      font-size: 1em;
+    }
+    .result-content strong {
+      font-size: 1em;
+    }
+    
+    /* Clickable elements for remote control */
+    .clickable {
+      color: #1e90ff;
+      cursor: pointer;
+      padding: 8px;
+      display: inline-block;
+    }
+    .clickable:focus {
+      outline: 3px solid #1e90ff;
+    }
+    
+    /* Sections (Available Trailers, Collection, Main Actors, Streaming on) */
+    .streaming, .actors, .collection, .known-for, .all-credits {
+      margin-top: 10px;
+      font-size: 1em;
+    }
+    
+    /* Other Results styling as a grid with smaller cards */
+    #otherResults {
+      margin: 20px 0;
+    }
+    #otherResults h3 {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .card:focus {
+      outline: 3px solid #1e90ff;
+    }
+    .card p {
+      margin: 5px 0;
+      font-size: 1em;
+    }
+    
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #333;
+      font-size: 1em;
+      margin-top: 20px;
+    }
+    footer img {
+      max-width: 100px;
+      height: auto;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    
+    /* Overlay styling for trailer playback */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #overlay-content {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+    }
+    #overlay-content iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+    }
+    #close-overlay {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    /* Unmute toggle button styling */
+    #unmute-button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #1e90ff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #unmute-button:focus {
+      outline: 3px solid #fff;
+    }
+    /* Stop Trailer button styling */
+    #stop-button {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #ff0000;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #stop-button:focus {
+      outline: 3px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <header> 
+    <center>
+      <table style="width:70%;">
+        <tr>
+          <td style="width:20%; text-align: center;">
+            <img src=".\0.png" style="width: 80%; height: 80%;">
+          </td>
+          <td style="text-align: center;">
+            <input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..." tabindex="0">
+          </td>
+          <td style="width:15%; text-align: center;">
+            <button id="searchButton" tabindex="0">Search</button>
+          </td>
+        </tr>
+      </table>  
+    </center> 
+  </header> 
+
+  <div class="container">
+    <!-- Main result display -->
+    <div id="mainResult"></div>
+    <!-- Other Results displayed as a grid -->
+    <div id="otherResults"></div>
+  </div>
+
+  <footer>
+    <center>
+      <table style="width:70%;">
+        <tr>
+          <td style="width:15%; text-align: center;">
+            <p style="font-size: 0.75vw;">
+              The TechDad1027
+              <img alt="thetechdad1027@gmail.com" src=".\Logo.png" style="width: 60%; height: 60%;">
+              thetechdad1027@gmail.com
+            </p>
+          </td>
+          <td style="width:70%; text-align: center;"></td>
+          <td style="width:15%; text-align: center;">
+            <img src=".\Coffee.png" style="width: 50%; height: 50%;">
+            <br><a href="https://buymeacoffee.com/thetechdad1027" style="color:white; font-size:1em;">Buy me a coffee!</a>
+          </td>
+        </tr>
+      </table>
+    </center> 
+  </footer>
+
+  <!-- Overlay for trailer playback -->
+  <div id="overlay">
+    <div id="overlay-content">
+      <button id="close-overlay">&times;</button>
+      <!-- The YouTube player will be inserted in the "player" div below -->
+      <div id="player"></div>
+      <!-- Unmute toggle button -->
+      <button id="unmute-button" tabindex="0">Unmute</button>
+      <!-- Stop Trailer button -->
+      <button id="stop-button" tabindex="0">Stop Trailer</button>
+    </div>
+  </div>
+  
+  <script>
+    // Load YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player; // Global YT.Player instance
+
+    const apiKey = "020fd53d900b9f0ece40d4ca501d5065";
+    const baseImageUrl = "https://image.tmdb.org/t/p/w500";
+    
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const mainResult = document.getElementById('mainResult');
+    const otherResultsContainer = document.getElementById('otherResults');
+    const overlay = document.getElementById('overlay');
+    const closeOverlayBtn = document.getElementById('close-overlay');
+    const unmuteButton = document.getElementById('unmute-button');
+    const stopButton = document.getElementById('stop-button');
+    
+    let searchResults = [];
+    
+    // Removed the blur listener.
+    searchInput.addEventListener('focus', () => {
+      searchInput.value = "";
+    });
+    
+    // Trigger search on Enter key press.
+    searchInput.addEventListener('keydown', (e) => {
+      if(e.key === "Enter") {
+        performSearch(searchInput.value.trim());
+      }
+    });
+    
+    // Trigger search when search button is clicked.
+    searchButton.addEventListener('click', () => {
+      performSearch(searchInput.value.trim());
+    });
+    
+    function performSearch(query) {
+      mainResult.innerHTML = "";
+      otherResultsContainer.innerHTML = "";
+      searchResults = [];
+      
+      mainResult.innerHTML = "<p>Loading...</p>";
+      const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}`;
+      
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if(data.results && data.results.length > 0) {
+            searchResults = data.results;
+            renderMainResult(searchResults[0]);
+            if(searchResults.length > 1) {
+              buildOtherResults(searchResults.slice(1));
+            }
+          } else {
+            mainResult.innerHTML = "<p>No results found.</p>";
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          mainResult.innerHTML = "<p>Error fetching data. Please try again later.</p>";
+        });
+    }
+    
+    function fetchMediaDetails(item) {
+      const type = item.media_type;
+      const endpoint = type === "movie" ? "movie" : "tv";
+      const url = `https://api.themoviedb.org/3/${endpoint}/${item.id}?api_key=${apiKey}&append_to_response=watch/providers,videos,credits,next_episode_to_air`;
+      return fetch(url).then(response => response.json())
+        .then(details => {
+          if(!details.media_type && details.hasOwnProperty("next_episode_to_air")){
+            details.media_type = "tv";
+          }
+          return details;
+        });
+    }
+    
+    function renderMainResult(item) {
+      mainResult.innerHTML = "";
+      if(item.media_type === "movie" || item.media_type === "tv") {
+        fetchMediaDetails(item)
+          .then(details => {
+            renderMediaResult(details, mainResult);
+          })
+          .catch(error => {
+            console.error("Error fetching details:", error);
+            mainResult.innerHTML = "<p>Error loading detailed information.</p>";
+          });
+      } else if(item.media_type === "person") {
+        renderPersonResult(item, mainResult);
+      }
+    }
+    
+    // Build Other Results as a grid of cards (multiple rows)
+    function buildOtherResults(results) {
+      const container = otherResultsContainer;
+      container.innerHTML = "";
+      
+      // Rename header as requested.
+      const header = document.createElement('h3');
+      header.textContent = "You may also be looking for:";
+      container.appendChild(header);
+      
+      const gridContainer = document.createElement('div');
+      gridContainer.className = "card-container";
+      gridContainer.style.display = "grid";
+      gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(150px, 1fr))";
+      gridContainer.style.gap = "10px";
+      
+      results.slice(0, 10).forEach((item) => {
+        const card = document.createElement('div');
+        card.className = "card";
+        card.setAttribute("tabindex", "0");
+        
+        const cardTitle = document.createElement('p');
+        cardTitle.textContent = item.title || item.name || "Untitled";
+        card.appendChild(cardTitle);
+        
+        let releaseYear = "";
+        if(item.release_date) {
+          releaseYear = new Date(item.release_date).getFullYear();
+        } else if(item.first_air_date) {
+          releaseYear = new Date(item.first_air_date).getFullYear();
+        }
+        if(releaseYear) {
+          const yearP = document.createElement('p');
+          yearP.textContent = releaseYear;
+          card.appendChild(yearP);
+        }
+        
+        card.addEventListener('click', () => {
+          renderMainResult(item);
+        });
+        
+        gridContainer.appendChild(card);
+      });
+      
+      container.appendChild(gridContainer);
+    }
+    
+    function renderMediaResult(item, container) {
+      const div = document.createElement('div');
+      div.className = "result";
+      
+      const img = document.createElement('img');
+      if(item.poster_path) {
+        img.src = baseImageUrl + item.poster_path;
+      } else {
+        img.alt = "No Image Available";
+      }
+      div.appendChild(img);
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "result-content";
+      
+      const title = document.createElement('h2');
+      title.textContent = item.title || item.name;
+      contentDiv.appendChild(title);
+      
+      // Description Section
+      const overview = document.createElement('p');
+      overview.textContent = item.overview || "No description available.";
+      contentDiv.appendChild(overview);
+      
+      // For TV shows: show next episode air date with extra space above.
+      if(item.media_type === "tv") {
+        const nextEpisode = document.createElement('p');
+        nextEpisode.style.marginTop = "10px"; // Extra space above
+        if(item.next_episode_to_air && item.next_episode_to_air.air_date) {
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> ${item.next_episode_to_air.air_date}`;
+        } else {
+          nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> Not available`;
+        }
+        contentDiv.appendChild(nextEpisode);
+      }
+      
+      // Available Trailers Section
+      if(item.videos && item.videos.results && item.videos.results.length > 0) {
+        const trailer = item.videos.results.find(video => video.type === "Trailer" && video.site === "YouTube");
+        if(trailer) {
+          const trailerSection = document.createElement('p');
+          trailerSection.innerHTML = "<strong>Available Trailers:</strong> ";
+          const playLink = document.createElement('a');
+          playLink.href = "#";
+          playLink.textContent = "Play";
+          playLink.className = "clickable";
+          playLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openOverlay(trailer.key);
+          });
+          trailerSection.appendChild(playLink);
+          contentDiv.appendChild(trailerSection);
+        }
+      }
+      
+      // Collection Section for movies (if available)
+      if(item.media_type === "movie" && item.belongs_to_collection) {
+        const collectionDiv = document.createElement('div');
+        collectionDiv.className = "collection";
+        collectionDiv.innerHTML = "<strong>Collection:</strong> ";
+        // Fetch collection details and display parts as clickable spans.
+        fetch(`https://api.themoviedb.org/3/collection/${item.belongs_to_collection.id}?api_key=${apiKey}`)
+          .then(response => response.json())
+          .then(collectionData => {
+            if(collectionData && collectionData.parts && collectionData.parts.length > 0) {
+              collectionData.parts.forEach((movie, index) => {
+                const movieSpan = document.createElement('span');
+                movieSpan.textContent = movie.title + (index < collectionData.parts.length - 1 ? ", " : "");
+                movieSpan.className = "clickable";
+                movieSpan.setAttribute("tabindex", "0");
+                movieSpan.addEventListener('click', () => {
+                  searchInput.value = movie.title;
+                  performSearch(movie.title);
+                });
+                movieSpan.addEventListener('keydown', (e) => {
+                  if(e.key === "Enter"){
+                    searchInput.value = movie.title;
+                    performSearch(movie.title);
+                  }
+                });
+                collectionDiv.appendChild(movieSpan);
+              });
+            } else {
+              collectionDiv.innerHTML += "None";
+            }
+            contentDiv.appendChild(collectionDiv);
+          })
+          .catch(error => {
+            console.error("Error fetching collection details:", error);
+            collectionDiv.innerHTML += "Error fetching collection";
+            contentDiv.appendChild(collectionDiv);
+          });
+      }
+      
+      // Main Actors Section (individual spans with margin)
+      if(item.credits && item.credits.cast && item.credits.cast.length > 0) {
+        const actorsDiv = document.createElement('div');
+        actorsDiv.className = "actors";
+        actorsDiv.innerHTML = "<strong>Main Actors:</strong> ";
+        item.credits.cast.slice(0,5).forEach(actor => {
+          const actorSpan = document.createElement('span');
+          actorSpan.textContent = actor.name;
+          actorSpan.className = "clickable";
+          actorSpan.style.marginRight = "5px";
+          actorSpan.setAttribute("tabindex", "0");
+          actorSpan.addEventListener('click', () => {
+            searchInput.value = actor.name;
+            performSearch(actor.name);
+          });
+          actorSpan.addEventListener('keydown', (e) => {
+            if(e.key === "Enter"){
+              searchInput.value = actor.name;
+              performSearch(actor.name);
+            }
+          });
+          actorsDiv.appendChild(actorSpan);
+        });
+        contentDiv.appendChild(actorsDiv);
+      }
+      
+      // Streaming on Section with separators
+      if(item["watch/providers"] && item["watch/providers"].results && item["watch/providers"].results.US) {
+        const providers = item["watch/providers"].results.US.flatrate || item["watch/providers"].results.US.buy || [];
+        if(providers.length > 0) {
+          const streamDiv = document.createElement('div');
+          streamDiv.className = "streaming";
+          streamDiv.innerHTML = "<strong>Streaming on:</strong> ";
+          providers.forEach((provider, index) => {
+            const provSpan = document.createElement('span');
+            provSpan.textContent = provider.provider_name;
+            provSpan.style.marginRight = "5px";
+            streamDiv.appendChild(provSpan);
+            if (index < providers.length - 1) {
+              const sepSpan = document.createElement('span');
+              sepSpan.textContent = " | ";
+              sepSpan.style.marginRight = "5px";
+              streamDiv.appendChild(sepSpan);
+            }
+          });
+          contentDiv.appendChild(streamDiv);
+        }
+      }
+      
+      div.appendChild(contentDiv);
+      container.appendChild(div);
+    }
+    
+    function renderPersonResult(item, container) {
+      const div = document.createElement('div');
+      div.className = "result";
+      
+      const img = document.createElement('img');
+      if(item.profile_path) {
+        img.src = baseImageUrl + item.profile_path;
+      } else {
+        img.alt = "No Image Available";
+      }
+      div.appendChild(img);
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "result-content";
+      
+      const name = document.createElement('h2');
+      name.textContent = item.name;
+      contentDiv.appendChild(name);
+      
+      if(item.known_for && item.known_for.length > 0) {
+        const knownForDiv = document.createElement('div');
+        knownForDiv.className = "known-for";
+        knownForDiv.innerHTML = "<strong>Known For:</strong><br>";
+        item.known_for.forEach(project => {
+          const projectDiv = document.createElement('div');
+          projectDiv.style.marginBottom = "10px";
+          
+          const projectTitle = project.title || project.name || "Untitled";
+          let releaseYear = "";
+          if(project.release_date) {
+            releaseYear = new Date(project.release_date).getFullYear();
+          } else if(project.first_air_date) {
+            releaseYear = new Date(project.first_air_date).getFullYear();
+          }
+          const titleSpan = document.createElement('span');
+          titleSpan.textContent = releaseYear ? `${projectTitle} (${releaseYear})` : projectTitle;
+          titleSpan.className = "clickable";
+          titleSpan.setAttribute("tabindex", "0");
+          titleSpan.addEventListener('click', () => {
+            searchInput.value = projectTitle;
+            performSearch(projectTitle);
+          });
+          titleSpan.addEventListener('keydown', (e) => {
+            if(e.key === "Enter"){
+              searchInput.value = projectTitle;
+              performSearch(projectTitle);
+            }
+          });
+          projectDiv.appendChild(titleSpan);
+          knownForDiv.appendChild(projectDiv);
+        });
+        contentDiv.appendChild(knownForDiv);
+      }
+      
+      div.appendChild(contentDiv);
+      container.appendChild(div);
+    }
+    
+    // Overlay functions for trailer playback using YouTube IFrame API with toggle mute and stop.
+    function openOverlay(videoKey) {
+      const overlayContent = document.getElementById('overlay-content');
+      overlayContent.innerHTML = "";
+      
+      // Create a container for the YouTube player
+      const playerDiv = document.createElement('div');
+      playerDiv.id = "player";
+      overlayContent.appendChild(playerDiv);
+      
+      // Create the unmute toggle button
+      const unmuteButton = document.createElement('button');
+      unmuteButton.id = "unmute-button";
+      unmuteButton.textContent = "Unmute";
+      overlayContent.appendChild(unmuteButton);
+      
+      // Create the stop trailer button
+      const stopButton = document.createElement('button');
+      stopButton.id = "stop-button";
+      stopButton.textContent = "Stop Trailer";
+      overlayContent.appendChild(stopButton);
+      
+      // Create the YouTube player using the IFrame API
+      player = new YT.Player('player', {
+        height: '450',
+        width: '100%',
+        videoId: videoKey,
+        playerVars: {
+          autoplay: 1,
+          mute: 1
+        },
+        events: {
+          'onReady': function(event) {
+            unmuteButton.addEventListener('click', function() {
+              if (player.isMuted()) {
+                player.unMute();
+                unmuteButton.textContent = "Mute";
+              } else {
+                player.mute();
+                unmuteButton.textContent = "Unmute";
+              }
+            });
+            stopButton.addEventListener('click', function() {
+              player.stopVideo();
+              closeOverlay();
+            });
+          }
+        }
+      });
+      
+      document.getElementById('overlay').style.display = "flex";
+    }
+
+    function closeOverlay() {
+      document.getElementById('overlay').style.display = "none";
+    }
+
+    document.getElementById('close-overlay').addEventListener('click', closeOverlay);
+
+    document.getElementById('overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeOverlay();
+      }
+    });
+    
+    // Set the search field as the first tab stop on page load.
+    window.onload = function() {
+      document.getElementById('searchInput').focus();
+    };
+  </script>
+
+  <!-- Overlay for trailer playback -->
+  <div id="overlay" style="display: none;">
+    <div id="overlay-content" style="position: relative; width: 80%; max-width: 800px;">
+      <button id="close-overlay" style="position: absolute; top: -20px; right: -20px; background: #fff; color: #000; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5em; cursor: pointer;">&times;</button>
+    </div>
+  </div>
+</body>
+</html>
