@@ -25,7 +25,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      font-size: 0.9vw; /* Base font size set to 0.9vw */
+      font-size: 1.1vw; /* Base font size */
     }
     .container {
       max-width: 960px;
@@ -34,11 +34,12 @@
       flex: 1;
     }
     h1 { text-align: center; }
-    /* Smaller search field style */
+    
+    /* Search field styling */
     #searchInput {
       width: 300px;
       padding: 1vw;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
       border: 1px solid #444;
       border-radius: 0.9vw;
       margin-bottom: 1vw;
@@ -47,10 +48,11 @@
     #searchInput:focus {
       outline: 1px solid #1e90ff;
     }
-    /* Style for the search button */
+    
+    /* Search button styling */
     #searchButton {
       padding: 0.5vw 1vw;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
       border: 1px solid #1e90ff;
       border-radius: 0.9vw;
       background-color: #1e90ff;
@@ -61,6 +63,8 @@
     #searchButton:focus {
       outline: 1px solid #fff;
     }
+    
+    /* Result styling */
     .result {
       border-bottom: 0.9vw solid #333;
       padding: 1.8vw;
@@ -84,27 +88,26 @@
     }
     .result-content p {
       margin: 0.5vw 0;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
     }
     .result-content strong {
-      font-size: 0.9vw;
+      font-size: 1.1vw;
     }
     
     /* Clickable elements for remote control */
     .clickable {
       color: #1e90ff;
       cursor: pointer;
-      padding: 0.9vw;
       display: inline-block;
     }
     .clickable:focus {
       outline: 1px solid #1e90ff;
     }
     
-    /* Sections (Available Trailers, Collection, Main Actors, Streaming on) */
+    /* Sections (Available Trailers, Collection, Main Actors, Known For, All Credits) */
     .streaming, .actors, .collection, .known-for, .all-credits {
       margin-top: 1vw;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
     }
     
     /* Other Results styling as a grid with smaller cards */
@@ -113,7 +116,7 @@
     }
     #otherResults h3 {
       margin-bottom: 1vw;
-      font-size: 1vw;
+      font-size: 1.1vw;
     }
     .card-container {
       display: grid;
@@ -122,7 +125,7 @@
     }
     .card {
       background-color: #1e1e1e;
-      border: 1px solid #444;  /* Fixed 1px border */
+      border: 1px solid #444;
       border-radius: 0.9vw;
       padding: 1vw;
       text-align: center;
@@ -133,15 +136,15 @@
     }
     .card p {
       margin: 0.5vw 0;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
     }
     
     /* Footer styling */
     footer {
       text-align: center;
       padding: 1vw;
-      border-top: 1px solid #333;  /* Fixed 1px border */
-      font-size: 0.9vw;
+      border-top: 1px solid #333;
+      font-size: 1.1vw;
       margin-top: 1.8vw;
     }
     footer img {
@@ -194,7 +197,7 @@
       bottom: 1vw;
       right: 1vw;
       padding: 1vw 1.5vw;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
       background-color: #1e90ff;
       color: #fff;
       border: none;
@@ -211,7 +214,7 @@
       bottom: 1vw;
       left: 1vw;
       padding: 1vw 1.5vw;
-      font-size: 0.9vw;
+      font-size: 1.1vw;
       background-color: #ff0000;
       color: #fff;
       border: none;
@@ -252,7 +255,7 @@
 
   <footer>
     <center>
-      <table style="width:70%; font-size: 1vw;">
+      <table style="width:70%; font-size: 1.1vw;">
         <tr>
           <td style="width:15%; text-align: center;">
               The TechDad1027
@@ -260,10 +263,10 @@
               thetechdad1027@gmail.com
           </td>
           <td style="width:70%; text-align: center;">
-		        I'm accepting <strong>"Buy Me a Coffee"</strong> donations to help keep this web app free for everyone. 
-				Your support covers costs like hosting, my time and development, helping me improve features without 
-				relying on ads or fees. Every contribution matters—thank you for supporting my work!
-		  </td>
+            I'm accepting <strong>"Buy Me a Coffee"</strong> donations to help keep this web app free for everyone. 
+            Your support covers costs like hosting, my time and development, helping me improve features without 
+            relying on ads or fees. Every contribution matters—thank you for supporting my work!
+          </td>
           <td style="width:15%; text-align: center;">
             <img src=".\Coffee.png" style="width: 70%; height: 70%;">
             <br><a href="https://buymeacoffee.com/thetechdad1027" style="color:white; font-size:1em;">Buy me a coffee!</a>
@@ -309,19 +312,19 @@
     
     let searchResults = [];
     
-    // Removed the blur listener.
+    // Clear search field on focus
     searchInput.addEventListener('focus', () => {
       searchInput.value = "";
     });
     
-    // Trigger search on Enter key press.
+    // Trigger search on Enter key press
     searchInput.addEventListener('keydown', (e) => {
       if(e.key === "Enter") {
         performSearch(searchInput.value.trim());
       }
     });
     
-    // Trigger search when search button is clicked.
+    // Trigger search on button click
     searchButton.addEventListener('click', () => {
       performSearch(searchInput.value.trim());
     });
@@ -340,7 +343,8 @@
           if(data.results && data.results.length > 0) {
             searchResults = data.results;
             renderMainResult(searchResults[0]);
-            if(searchResults.length > 1) {
+            // Only build "You may also be looking for:" if main result is not a person
+            if(searchResults.length > 1 && searchResults[0].media_type !== "person") {
               buildOtherResults(searchResults.slice(1));
             }
           } else {
@@ -387,7 +391,6 @@
       const container = otherResultsContainer;
       container.innerHTML = "";
       
-      // Rename header as requested.
       const header = document.createElement('h3');
       header.textContent = "You may also be looking for:";
       container.appendChild(header);
@@ -448,15 +451,15 @@
       title.textContent = item.title || item.name;
       contentDiv.appendChild(title);
       
-      // Description Section
+      // Description
       const overview = document.createElement('p');
       overview.textContent = item.overview || "No description available.";
       contentDiv.appendChild(overview);
       
-      // For TV shows: show next episode air date with extra space above.
+      // For TV shows: next episode air date
       if(item.media_type === "tv") {
         const nextEpisode = document.createElement('p');
-        nextEpisode.style.marginTop = "1vw"; // Extra space above
+        nextEpisode.style.marginTop = "1vw";
         if(item.next_episode_to_air && item.next_episode_to_air.air_date) {
           nextEpisode.innerHTML = `<strong>Next Episode Air Date:</strong> ${item.next_episode_to_air.air_date}`;
         } else {
@@ -489,14 +492,13 @@
         const collectionDiv = document.createElement('div');
         collectionDiv.className = "collection";
         collectionDiv.innerHTML = "<strong>Collection:</strong> ";
-        // Fetch collection details and display parts as clickable spans.
         fetch(`https://api.themoviedb.org/3/collection/${item.belongs_to_collection.id}?api_key=${apiKey}`)
           .then(response => response.json())
           .then(collectionData => {
             if(collectionData && collectionData.parts && collectionData.parts.length > 0) {
               collectionData.parts.forEach((movie, index) => {
                 const movieSpan = document.createElement('span');
-                movieSpan.textContent = movie.title + (index < collectionData.parts.length - 1 ? ", " : "");
+                movieSpan.textContent = movie.title;
                 movieSpan.className = "clickable";
                 movieSpan.setAttribute("tabindex", "0");
                 movieSpan.addEventListener('click', () => {
@@ -510,6 +512,9 @@
                   }
                 });
                 collectionDiv.appendChild(movieSpan);
+                if(index < collectionData.parts.length - 1) {
+                  collectionDiv.appendChild(document.createTextNode(", "));
+                }
               });
             } else {
               collectionDiv.innerHTML += "None";
@@ -523,28 +528,37 @@
           });
       }
       
-      // Main Actors Section (individual spans with margin)
-      if(item.credits && item.credits.cast && item.credits.cast.length > 0) {
+      // Main Actors Section (comma-separated, clickable, no extra space before commas)
+      if (item.credits && item.credits.cast && item.credits.cast.length > 0) {
         const actorsDiv = document.createElement('div');
         actorsDiv.className = "actors";
-        actorsDiv.innerHTML = "<strong>Main Actors:</strong> ";
-        item.credits.cast.slice(0,5).forEach(actor => {
+        
+        const strongText = document.createElement('strong');
+        strongText.textContent = "Main Actors: ";
+        actorsDiv.appendChild(strongText);
+      
+        const mainActors = item.credits.cast.slice(0, 5);
+        mainActors.forEach((actor, index) => {
           const actorSpan = document.createElement('span');
           actorSpan.textContent = actor.name;
           actorSpan.className = "clickable";
-          actorSpan.style.marginRight = "1vw";
+          actorSpan.style.padding = "0";
+          actorSpan.style.margin = "0";
           actorSpan.setAttribute("tabindex", "0");
           actorSpan.addEventListener('click', () => {
             searchInput.value = actor.name;
             performSearch(actor.name);
           });
           actorSpan.addEventListener('keydown', (e) => {
-            if(e.key === "Enter"){
+            if (e.key === "Enter") {
               searchInput.value = actor.name;
               performSearch(actor.name);
             }
           });
           actorsDiv.appendChild(actorSpan);
+          if (index < mainActors.length - 1) {
+            actorsDiv.appendChild(document.createTextNode(", "));
+          }
         });
         contentDiv.appendChild(actorsDiv);
       }
@@ -576,6 +590,8 @@
       container.appendChild(div);
     }
     
+    // Updated renderPersonResult with a 2-column grid for up to 20 credits,
+    // plus a "Load More" button to load subsequent pages if available.
     function renderPersonResult(item, container) {
       const div = document.createElement('div');
       div.className = "result";
@@ -595,40 +611,78 @@
       name.textContent = item.name;
       contentDiv.appendChild(name);
       
-      if(item.known_for && item.known_for.length > 0) {
-        const knownForDiv = document.createElement('div');
-        knownForDiv.className = "known-for";
-        knownForDiv.innerHTML = "<strong>Known For:</strong><br>";
-        item.known_for.forEach(project => {
-          const projectDiv = document.createElement('div');
-          projectDiv.style.marginBottom = "1vw";
+      // Known For Section with pagination support
+      const knownForDiv = document.createElement('div');
+      knownForDiv.className = "known-for";
+      knownForDiv.innerHTML = "<strong>Known For:</strong><br>";
+      contentDiv.appendChild(knownForDiv);
+      
+      fetch(`https://api.themoviedb.org/3/person/${item.id}/combined_credits?api_key=${apiKey}`)
+        .then(response => response.json())
+        .then(creditsData => {
+          let credits = creditsData.cast || [];
+          const knownForGrid = document.createElement('div');
+          knownForGrid.style.display = 'grid';
+          knownForGrid.style.gridTemplateColumns = '1fr 1fr';
+          knownForGrid.style.gap = '1vw';
           
-          const projectTitle = project.title || project.name || "Untitled";
-          let releaseYear = "";
-          if(project.release_date) {
-            releaseYear = new Date(project.release_date).getFullYear();
-          } else if(project.first_air_date) {
-            releaseYear = new Date(project.first_air_date).getFullYear();
-          }
-          const titleSpan = document.createElement('span');
-          titleSpan.textContent = releaseYear ? `${projectTitle} (${releaseYear})` : projectTitle;
-          titleSpan.className = "clickable";
-          titleSpan.setAttribute("tabindex", "0");
-          titleSpan.addEventListener('click', () => {
-            searchInput.value = projectTitle;
-            performSearch(projectTitle);
-          });
-          titleSpan.addEventListener('keydown', (e) => {
-            if(e.key === "Enter"){
-              searchInput.value = projectTitle;
-              performSearch(projectTitle);
+          // Function to load a page of 20 credits starting at index startIndex
+          function loadCreditsPage(startIndex) {
+            // Loop from startIndex to next 20 items
+            for (let i = startIndex; i < Math.min(startIndex + 20, credits.length); i++) {
+              const project = credits[i];
+              const projectDiv = document.createElement('div');
+              projectDiv.style.marginBottom = "1vw";
+              
+              const projectTitle = project.title || project.name || "Untitled";
+              let releaseYear = "";
+              if(project.release_date) {
+                releaseYear = new Date(project.release_date).getFullYear();
+              } else if(project.first_air_date) {
+                releaseYear = new Date(project.first_air_date).getFullYear();
+              }
+              
+              const titleSpan = document.createElement('span');
+              titleSpan.textContent = releaseYear ? `${projectTitle} (${releaseYear})` : projectTitle;
+              titleSpan.className = "clickable";
+              titleSpan.setAttribute("tabindex", "0");
+              titleSpan.addEventListener('click', () => {
+                searchInput.value = projectTitle;
+                performSearch(projectTitle);
+              });
+              titleSpan.addEventListener('keydown', (e) => {
+                if(e.key === "Enter"){
+                  searchInput.value = projectTitle;
+                  performSearch(projectTitle);
+                }
+              });
+              projectDiv.appendChild(titleSpan);
+              knownForGrid.appendChild(projectDiv);
             }
-          });
-          projectDiv.appendChild(titleSpan);
-          knownForDiv.appendChild(projectDiv);
+            // If more credits remain, add a "Load More" button
+            if (startIndex + 20 < credits.length) {
+              const loadMoreDiv = document.createElement('div');
+              loadMoreDiv.style.cursor = "pointer";
+              loadMoreDiv.style.textAlign = "center";
+              loadMoreDiv.style.gridColumn = "span 2";
+              loadMoreDiv.textContent = "Load More";
+              loadMoreDiv.className = "clickable";
+              loadMoreDiv.addEventListener('click', () => {
+                loadMoreDiv.remove(); // Remove the current load more button
+                loadCreditsPage(startIndex + 20);
+              });
+              knownForGrid.appendChild(loadMoreDiv);
+            }
+          }
+          
+          // Load the first page (0 to 20)
+          loadCreditsPage(0);
+          knownForDiv.appendChild(knownForGrid);
+        })
+        .catch(error => {
+          console.error("Error fetching person credits:", error);
+          knownForDiv.innerHTML += "Error loading credits.";
         });
-        contentDiv.appendChild(knownForDiv);
-      }
       
       div.appendChild(contentDiv);
       container.appendChild(div);
@@ -639,24 +693,20 @@
       const overlayContent = document.getElementById('overlay-content');
       overlayContent.innerHTML = "";
       
-      // Create a container for the YouTube player
       const playerDiv = document.createElement('div');
       playerDiv.id = "player";
       overlayContent.appendChild(playerDiv);
       
-      // Create the unmute toggle button
       const unmuteButton = document.createElement('button');
       unmuteButton.id = "unmute-button";
       unmuteButton.textContent = "Unmute";
       overlayContent.appendChild(unmuteButton);
       
-      // Create the stop trailer button
       const stopButton = document.createElement('button');
       stopButton.id = "stop-button";
       stopButton.textContent = "Stop Trailer";
       overlayContent.appendChild(stopButton);
       
-      // Create the YouTube player using the IFrame API
       player = new YT.Player('player', {
         height: '450',
         width: '100%',
@@ -699,7 +749,6 @@
       }
     });
     
-    // Set the search field as the first tab stop on page load.
     window.onload = function() {
       document.getElementById('searchInput').focus();
     };
