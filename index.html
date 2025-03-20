@@ -49,8 +49,8 @@
       outline: 1px solid #1e90ff;
     }
     
-    /* Search button styling */
-    #searchButton {
+    /* Search and Clear button styling */
+    #searchButton, #clearButton {
       padding: 0.5vw 1vw;
       font-size: 2.2vw;
       border: 1px solid #1e90ff;
@@ -60,7 +60,7 @@
       cursor: pointer;
       outline: none;
     }
-    #searchButton:focus {
+    #searchButton:focus, #clearButton:focus {
       outline: 1px solid #fff;
     }
     
@@ -73,7 +73,7 @@
     }
     .result img {
       max-width: 200px;
-      height: auto; /* Maintain aspect ratio */
+      height: auto;
       border-radius: 0.9vw;
       margin-right: 1.8vw;
       flex-shrink: 0;
@@ -104,7 +104,7 @@
       outline: 1px solid #1e90ff;
     }
     
-    /* Sections (Available Trailers, Collection, Main Actors, Known For, All Credits) */
+    /* Sections */
     .streaming, .actors, .collection, .known-for, .all-credits {
       margin-top: 1vw;
       font-size: 2.2vw;
@@ -230,7 +230,7 @@
 <body>
   <header> 
     <center>
-      <table style="width:70%;">
+      <table style="width:90%;">
         <tr>
           <td style="width:20%; text-align: center;">
             <img src="https://thetechdad1027.github.io/wherecaniwatchit/0.png" style="width: 80%; height: 80%;">
@@ -238,8 +238,12 @@
           <td style="text-align: center;">
             <input type="text" id="searchInput" placeholder="Search movies, TV shows, or actors..." tabindex="0">
           </td>
-          <td style="width:15%; text-align: center;">
-            <button id="searchButton" tabindex="0">Search</button>
+          <td style="width:20%; text-align: center;">
+            <!-- Using inline-flex to display buttons side by side -->
+            <div style="display: inline-flex; align-items: center;">
+              <button id="searchButton" tabindex="0">Search</button>
+              <button id="clearButton" tabindex="0" style="margin-left: 1vw;">Clear</button>
+            </div>
           </td>
         </tr>
       </table>  
@@ -255,7 +259,7 @@
 
   <footer>
     <center>
-      <table style="width:70%; font-size: 2.2vw;">
+      <table style="width:90%; font-size: 1.2vw;">
         <tr>
           <td style="width:15%; text-align: center;">
               The TechDad1027
@@ -303,6 +307,7 @@
     
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
+    const clearButton = document.getElementById('clearButton');
     const mainResult = document.getElementById('mainResult');
     const otherResultsContainer = document.getElementById('otherResults');
     const overlay = document.getElementById('overlay');
@@ -312,8 +317,10 @@
     
     let searchResults = [];
     
-    // Clear search field on focus
-    searchInput.addEventListener('focus', () => {
+    // Removed the listener that clears the search field on focus.
+    
+    // Listener for clear button
+    clearButton.addEventListener('click', () => {
       searchInput.value = "";
     });
     
